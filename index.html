@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>SmartLife · pro · INR</title>
+  <!-- Chart.js 4 (smooth animations) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Font Awesome 6 (free icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f0f5fa 0%, #eef2f6 100%);
+      color: #13294b;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-container {
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ========== MODERN GLASS NAVIGATION ========== */
+    .nav-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: rgba(18, 30, 50, 0.75);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 12px 28px;
+      border-radius: 80px;
+      box-shadow: 0 20px 35px -8px rgba(0, 20, 40, 0.4), 0 0 0 1px rgba(255,255,255,0.2) inset;
+      margin-bottom: 40px;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      padding: 14px 30px;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      font-weight: 550;
+      color: rgba(255,255,255,0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      letter-spacing: 0.01em;
+    }
+
+    .nav-btn i { font-size: 1.3rem; color: #b5ccf0; }
+
+    .nav-btn.active {
+      background: white;
+      color: #0c1e38;
+      box-shadow: 0 18px 25px -8px #030c18, 0 0 0 2px rgba(255,255,240,0.7) inset;
+      transform: scale(1.05);
+    }
+
+    .nav-btn.active i { color: #1e3a6b; }
+
+    .nav-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      transform: translateY(-3px);
+    }
+
+    /* ========== PAGE TRANSITIONS (SLIDE+FADE) ========== */
+    .page {
+      display: none;
+      animation: floatIn 0.45s cubic-bezier(0.15, 0.9, 0.25, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    .page.active-page {
+      display: block;
+    }
+
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(24px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* ========== PROFESSIONAL CARD – with micro hover (lift + glow) ========== */
+    .card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 40px;
+      padding: 28px;
+      box-shadow: 0 25px 45px -20px #0a1e32, 0 0 0 1px rgba(255,255,255,0.6) inset;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.9);
+      height: fit-content;
+    }
+
+    .card:hover {
+      transform: translateY(-8px) scale(1.01);
+      box-shadow: 0 35px 55px -18px #041527, 0 0 0 2px rgba(255,255,255,0.9) inset;
+      background: rgba(255,255,255,0.95);
+    }
+
+    /* ========== GRIDS ========== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid, .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+      .nav-bar { border-radius: 50px; }
+    }
+
+    /* ========== FORM ELEMENTS ========== */
+    input, select, textarea {
+      background: rgba(255,255,255,0.9);
+      border: 1.5px solid #d6e2f0;
+      border-radius: 30px;
+      padding: 16px 22px;
+      font-size: 1rem;
+      width: 100%;
+      transition: 0.2s;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 8px #ebf2fa;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1f3a6b;
+      box-shadow: 0 0 0 4px rgba(28, 60, 120, 0.2), 0 4px 12px #cddcf0;
+      transform: scale(1.01);
+      background: white;
+    }
+
+    .btn {
+      background: linear-gradient(115deg, #13294b, #1f3e6f);
+      border: none;
+      color: white;
+      padding: 16px 30px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      box-shadow: 0 15px 25px -10px #0f2642, 0 2px 0 0 #8ba3cc inset;
+      transition: all 0.2s ease;
+      border: 1px solid #ffffff30;
+    }
+
+    .btn-outline {
+      background: white;
+      color: #13294b;
+      box-shadow: 0 8px 18px -8px #acb8cc;
+      border: 1.5px solid #ced9e9;
+    }
+
+    .btn-small {
+      padding: 10px 22px;
+      font-size: 0.95rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 24px 32px -12px #0a1f38, 0 0 0 2px #ffffffa0 inset;
+      background: linear-gradient(115deg, #1c3560, #264b82);
+    }
+
+    .btn-outline:hover {
+      background: #ecf3fc;
+      border-color: #1f3e6f;
+    }
+
+    /* expense / event items */
+    .expense-list, .event-list, .saved-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .expense-item, .event-item {
+      background: white;
+      border-radius: 30px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 10px 18px -8px #a7bbd4, 0 0 0 1px #ffffff inset;
+      border-left: 8px solid #1f3e6f;
+      transition: all 0.25s;
+    }
+
+    .event-item { border-left-color: #5879a7; }
+
+    .expense-item:hover, .event-item:hover {
+      transform: translateX(8px) scale(1.01);
+      box-shadow: 0 20px 28px -12px #233b60;
+      border-left-width: 10px;
+    }
+
+    .badge {
+      background: #e8f0fe;
+      border-radius: 40px;
+      padding: 6px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #13294b;
+      display: inline-block;
+      box-shadow: 0 2px 4px #bacde2;
+    }
+
+    /* insight cards */
+    .insight-bubble {
+      background: #ffffffd0;
+      backdrop-filter: blur(4px);
+      border-radius: 30px;
+      padding: 20px 24px;
+      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 8px 16px -10px #1a304e;
+      border: 1px solid white;
+    }
+
+    /* chart container (loading shimmer hidden by default, used as placeholder) */
+    .chart-container {
+      position: relative;
+      height: 220px;
+      width: 100%;
+      transition: opacity 0.5s;
+    }
+
+    .loading-shimmer {
+      background: linear-gradient(90deg, #e2eaf5 0%, #f6faff 40%, #e2eaf5 80%);
+      background-size: 300% 100%;
+      animation: wave 1.6s infinite ease;
+      border-radius: 40px;
+    }
+
+    @keyframes wave {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    .bookmark-star { color: #f5b830; }
+    .rupee-symbol { font-weight: 700; margin-right: 2px; }
+
+    /* scroll smooth */
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+<body>
+<div class="app-container">
+
+  <!-- premium navigation -->
+  <nav class="nav-bar">
+    <button class="nav-btn active" data-page="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button class="nav-btn" data-page="expenses"><i class="fas fa-wallet"></i> Expenses (₹)</button>
+    <button class="nav-btn" data-page="events"><i class="fas fa-calendar-alt"></i> Event Finder</button>
+    <button class="nav-btn" data-page="saved"><i class="fas fa-bookmark"></i> Saved</button>
+  </nav>
+
+  <!-- DASHBOARD page -->
+  <section id="dashboard" class="page active-page">
+    <div class="dashboard-grid">
+      <!-- left card: total + chart + insights -->
+      <div class="card">
+        <h2 style="display: flex; gap: 12px; align-items: center;"><i class="fas fa-indian-rupee-sign" style="background:#13294b; color:white; border-radius: 50%; padding: 10px;"></i> Monthly summary</h2>
+        <div style="font-size: 3.2rem; font-weight: 700; margin: 10px 0 0 0; letter-spacing: -1px;">
+          <span class="rupee-symbol">₹</span><span id="totalExpensesDash">0</span>
+        </div>
+        <div class="chart-container" style="height:200px; margin-top: 8px;">
+          <canvas id="dashboardChart"></canvas>
+        </div>
+        <div class="insight-bubble" id="insight1">
+          <i class="fas fa-magic" style="font-size: 2.2rem; color:#1f3e6f;"></i>
+          <span id="insightText">Add expenses to see smart predictions</span>
+        </div>
+      </div>
+      <!-- right card: dynamic insights + quick buttons -->
+      <div class="card">
+        <h3><i class="fas fa-bolt"></i> Smart insights</h3>
+        <div id="insightContainer">
+          <div class="insight-bubble"><i class="fas fa-chart-line"></i> biggest category: —</div>
+          <div class="insight-bubble"><i class="fas fa-wave-square"></i> vs last month: —</div>
+        </div>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 28px;">
+          <button class="btn" data-page="expenses"><i class="fas fa-plus-circle"></i> Add expense</button>
+          <button class="btn btn-outline" data-page="events"><i class="fas fa-search-location"></i> Find events</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPENSE TRACKER page (INR currency) -->
+  <section id="expenses" class="page">
+    <div class="grid-2">
+      <!-- left: form + category summary -->
+      <div class="card">
+        <h3><i class="fas fa-plus-circle" style="color: #13294b;"></i> New expense (₹)</h3>
+        <form id="expenseForm">
+          <input type="number" id="amount" placeholder="Amount (₹)" step="1" min="1" required>
+          <select id="category" required>
+            <option value="">Category</option>
+            <option>Food</option><option>Transport</option><option>Shopping</option>
+            <option>Entertainment</option><option>Bills</option><option>Other</option>
+          </select>
+          <input type="date" id="date" required>
+          <input type="text" id="desc" placeholder="Description (e.g. dinner)" required>
+          <button class="btn" type="submit"><i class="fas fa-save"></i> Save expense (₹)</button>
+        </form>
+        <div style="margin-top: 28px;">
+          <h4>📊 Category spend (₹)</h4>
+          <div id="categorySummary" class="insight-bubble" style="font-size: 1rem;">Food: ₹0, Transport: ₹0 ...</div>
+        </div>
+      </div>
+      <!-- right: expense list + monthly total -->
+      <div class="card">
+        <h3><i class="fas fa-list-ul"></i> All expenses</h3>
+        <div id="expenseListContainer" class="expense-list"></div>
+        <div style="margin-top: 20px; font-size: 1.5rem; font-weight: 600;">
+          <span>Monthly total: </span><span class="rupee-symbol">₹</span><span id="monthlyTotal">0</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVENT FINDER page -->
+  <section id="events" class="page">
+    <div class="card" style="margin-bottom: 28px;">
+      <div style="display: flex; gap: 18px; flex-wrap: wrap; align-items: center;">
+        <input type="text" id="cityInput" placeholder="City (e.g. Mumbai, Delhi)" value="Mumbai" style="flex: 3;">
+        <button class="btn" id="searchEventsBtn"><i class="fas fa-search"></i> Search</button>
+        <select id="categoryFilter" style="width: auto; flex: 1;">
+          <option value="all">All categories</option>
+          <option>Music</option><option>Sports</option><option>Food</option><option>Tech</option><option>Arts</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3><i class="fas fa-calendar-day"></i> Upcoming events</h3>
+        <div id="eventList" class="event-list"></div>
+      </div>
+      <div class="card">
+        <h3><i class="fas fa-bookmark"></i> Saved events</h3>
+        <div id="savedEventList" class="saved-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAVED page (mirror) -->
+  <section id="saved" class="page">
+    <div class="card">
+      <h2><i class="fas fa-bookmark"></i> Your bookmarked events</h2>
+      <div id="savedOnlyList" class="event-list"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function() {
+    // ---------- PROFESSIONAL SMART LIFE WITH INR & LIVELY ANIMATIONS ----------
+    let expenses = [];
+    let events = [];
+    let bookmarks = [];          // store event ids
+    let nextEventId = 1000;
+
+    // Load from localStorage
+    function loadData() {
+      try {
+        const storedExp = localStorage.getItem('smartlife_inr_expenses');
+        expenses = storedExp ? JSON.parse(storedExp) : [];
+
+        const storedBkm = localStorage.getItem('smartlife_inr_bookmarks');
+        bookmarks = storedBkm ? JSON.parse(storedBkm) : [];
+      } catch (e) { expenses = []; bookmarks = []; }
+      generateMockEvents();
+    }
+
+    function saveExpenses() { localStorage.setItem('smartlife_inr_expenses', JSON.stringify(expenses)); }
+    function saveBookmarks() { localStorage.setItem('smartlife_inr_bookmarks', JSON.stringify(bookmarks)); }
+
+    // realistic Indian / metro cities mock events
+    function generateMockEvents() {
+      const categories = ['Music', 'Sports', 'Food', 'Tech', 'Arts'];
+      const names = ['Sunburn Arena', 'IPL Night', 'Food Truck Fest', 'TechBash', 'Kala Ghoda', 'Comedy Show', 'Wine & Dine', 'Startup Meet', 'Cricket League', 'Bollywood Night'];
+      const cities = ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune'];
+      events = [];
+      for (let i=0; i<22; i++) {
+        const cat = categories[Math.floor(Math.random() * categories.length)];
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        events.push({
+          id: nextEventId++,
+          name: names[Math.floor(Math.random() * names.length)] + ' ' + (i+1),
+          date: `2025-0${Math.floor(Math.random()*5)+2}-${Math.floor(Math.random()*20)+10}`,
+          category: cat,
+          location: city + ', ' + ['Stadium','Ground','Center','Hub'][Math.floor(Math.random()*4)],
+          description: 'Exciting ' + cat + ' event in ' + city,
+          city: city
+        });
+      }
+    }
+
+    // render expenses (with INR)
+    function renderExpenses() {
+      const container = document.getElementById('expenseListContainer');
+      if (!container) return;
+      if (!expenses.length) { container.innerHTML = '<div class="badge">No expenses yet — start adding</div>'; updateTotals(); return; }
+      let html = '';
+      expenses.forEach((exp, idx) => {
+        html += `<div class="expense-item">
+          <div class="expense-info">
+            <strong style="font-size:1.2rem;">${exp.desc}</strong> <span class="badge">${exp.category}</span><br>
+            <span>${exp.date}  •  <span class="rupee-symbol">₹</span>${parseFloat(exp.amount).toFixed(0)}</span>
+          </div>
+          <div class="expense-actions">
+            <button class="btn-small btn-outline" onclick="editExpense(${idx})"><i class="fas fa-edit"></i> edit</button>
+            <button class="btn-small btn-outline" onclick="deleteExpense(${idx})"><i class="fas fa-trash"></i> del</button>
+          </div>
+        </div>`;
+      });
+      container.innerHTML = html;
+      updateTotals();
+    }
+
+    // update totals & insights with INR
+    function updateTotals() {
+      const now = new Date();
+      const month = now.getMonth();
+      const year = now.getFullYear();
+
+      let monthlyTotal = 0;
+      let catTotals = {Food:0, Transport:0, Shopping:0, Entertainment:0, Bills:0, Other:0};
+      expenses.forEach(e => {
+        const d = new Date(e.date);
+        if (d.getMonth() === month && d.getFullYear() === year) {
+          monthlyTotal += parseFloat(e.amount);
+        }
+        if (catTotals.hasOwnProperty(e.category)) catTotals[e.category] += parseFloat(e.amount);
+        else catTotals.Other += parseFloat(e.amount);
+      });
+
+      document.getElementById('monthlyTotal').innerText = monthlyTotal.toFixed(0);
+      document.getElementById('totalExpensesDash').innerText = monthlyTotal.toFixed(0);
+
+      let catString = Object.entries(catTotals).map(([c,v]) => `${c}: ₹${v.toFixed(0)}`).join(' · ');
+      document.getElementById('categorySummary').innerHTML = catString || 'No data';
+
+      // biggest category
+      let biggest = '—'; let maxVal = 0;
+      for (let [c,v] of Object.entries(catTotals)) { if (v>maxVal) { maxVal = v; biggest = c; } }
+      // simulated insight: 30% more on Food if > 2000
+      let foodMsg = catTotals.Food > 2000 ? 'Food 32% above last month (simulated)' : 'Food spending stable';
+      document.getElementById('insightContainer').innerHTML = `
+        <div class="insight-bubble"><i class="fas fa-crown"></i> Biggest: ${biggest} (₹${maxVal.toFixed(0)})</div>
+        <div class="insight-bubble"><i class="fas fa-chart-simple"></i> ${foodMsg}</div>
+      `;
+      document.getElementById('insightText').innerText = biggest!=='—' ? `You spent most on ${biggest} this month.` : 'Add expenses to unlock insights.';
+      updateDashboardChart(catTotals);
+    }
+
+    let dashChart = null;
+    function updateDashboardChart(catTotals) {
+      const ctx = document.getElementById('dashboardChart').getContext('2d');
+      if (dashChart) dashChart.destroy();
+      dashChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(catTotals),
+          datasets: [{
+            data: Object.values(catTotals),
+            backgroundColor: ['#1f3e6f','#345b99','#567ebb','#7fa0d4','#b0c6e8','#d6e3f5'],
+            borderWidth: 0,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          cutout: '68%',
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 1100, easing: 'easeOutElastic' }, // smooth loading animation
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // CRUD
+    window.deleteExpense = (idx) => { expenses.splice(idx,1); saveExpenses(); renderExpenses(); renderAll(); };
+    window.editExpense = (idx) => {
+      const e = expenses[idx];
+      const newAmt = prompt('Edit amount (₹)', e.amount);
+      if (newAmt) e.amount = parseFloat(newAmt).toFixed(0);
+      const newCat = prompt('Edit category', e.category);
+      if (newCat) e.category = newCat;
+      saveExpenses(); renderExpenses(); renderAll();
+    };
+
+    document.getElementById('expenseForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const amount = document.getElementById('amount').value;
+      const category = document.getElementById('category').value;
+      const date = document.getElementById('date').value;
+      const desc = document.getElementById('desc').value;
+      if (!amount || !category || !date || !desc) return alert('Please fill all fields');
+      expenses.push({ amount: parseFloat(amount).toFixed(0), category, date, desc });
+      saveExpenses();
+      renderExpenses();
+      e.target.reset();
+    });
+
+    // event render + filter
+    function renderEvents() {
+      const city = document.getElementById('cityInput').value.trim() || 'Mumbai';
+      const catFilter = document.getElementById('categoryFilter').value;
+      const filtered = events.filter(ev => ev.city.toLowerCase().includes(city.toLowerCase()) && (catFilter==='all' || ev.category===catFilter));
+      const container = document.getElementById('eventList');
+      if (!filtered.length) { container.innerHTML = '<div class="badge">No events – try another city</div>'; return; }
+      let html = '';
+      filtered.forEach(ev => {
+        const saved = bookmarks.includes(ev.id);
+        html += `<div class="event-item">
+          <div style="flex:2"><strong style="font-size:1.2rem;">${ev.name}</strong> <span class="badge">${ev.category}</span><br>
+          <i class="fas fa-calendar"></i> ${ev.date}  <i class="fas fa-map-pin"></i> ${ev.location}<br>${ev.description}</div>
+          <div><button class="btn-small btn-outline" onclick="toggleBookmark(${ev.id})">${saved ? '<i class="fas fa-bookmark bookmark-star"></i> saved' : '<i class="far fa-bookmark"></i> bookmark'}</button></div>
+        </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    window.toggleBookmark = (id) => {
+      if (bookmarks.includes(id)) { bookmarks = bookmarks.filter(b => b !== id); } else { bookmarks.push(id); }
+      saveBookmarks(); renderEvents(); renderSavedSections();
+    };
+
+    function renderSavedSections() {
+      const savedEv = events.filter(ev => bookmarks.includes(ev.id));
+      const html = savedEv.map(ev => `<div class="event-item">
+        <div><strong>${ev.name}</strong> <span class="badge">${ev.category}</span><br>${ev.date} · ${ev.location}</div>
+        <div><button class="btn-small btn-outline" onclick="toggleBookmark(${ev.id})"><i class="fas fa-bookmark"></i> remove</button></div>
+      </div>`).join('');
+      document.getElementById('savedEventList').innerHTML = html || '<div class="badge">No saved events</div>';
+      document.getElementById('savedOnlyList').innerHTML = html || '<div class="badge">Bookmark events to see them here</div>';
+    }
+
+    // page navigation
+    function setupNavigation() {
+      const navBtns = document.querySelectorAll('.nav-btn');
+      const pages = document.querySelectorAll('.page');
+      navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pageId = btn.dataset.page;
+          navBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          pages.forEach(p => p.classList.remove('active-page'));
+          document.getElementById(pageId).classList.add('active-page');
+          if (pageId==='events' || pageId==='saved') { renderEvents(); renderSavedSections(); }
+          if (pageId==='expenses' || pageId==='dashboard') { renderExpenses(); updateTotals(); }
+        });
+      });
+    }
+
+    function renderAll() { renderExpenses(); updateTotals(); renderEvents(); renderSavedSections(); }
+
+    // initialise
+    loadData();
+    renderAll();
+    setupNavigation();
+
+    document.getElementById('searchEventsBtn').addEventListener('click', renderEvents);
+    document.getElementById('categoryFilter').addEventListener('change', renderEvents);
+
+    // additional button navigation from dashboard
+    document.querySelectorAll('.btn[data-page]').forEach(b => {
+      b.addEventListener('click', (e) => {
+        const page = b.dataset.page;
+        document.querySelector(`.nav-btn[data-page="${page}"]`).click();
+      });
+    });
+  })();
+</script>
+
+<!-- subtle extra hover micro-interactions -->
+<style>
+  .btn i, .nav-btn i { transition: transform 0.2s; }
+  .btn:hover i, .nav-btn:hover i { transform: scale(1.2); }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #dde3ec; border-radius: 20px; }
+  ::-webkit-scrollbar-thumb { background: #1f3a6b; border-radius: 20px; }
+</style>
+</body>
+</html>
