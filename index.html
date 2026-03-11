@@ -2,51 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>SmartLife · mobile · INR</title>
-  <!-- Chart.js 4 (lightweight) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>SmartLife · user dashboard · INR</title>
+  <!-- Chart.js 4 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- Font Awesome 6 (free) -->
+  <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* Mobile-first minimal reset */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
     body {
-      background: #f2f5f9;
-      color: #121f33;
-      padding: 12px 12px 20px;
+      background: linear-gradient(145deg, #eef2f6 0%, #e0e8f2 100%);
+      color: #13294b;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
     }
 
     .app-container {
-      max-width: 600px;  /* perfect for mobile, still works on tablet */
-      margin: 0 auto;
+      max-width: 650px;
       width: 100%;
+      margin: 0 auto;
     }
 
-    /* ===== NAVIGATION – compact, scrollable if needed ===== */
+    /* LOGIN CARD */
+    .login-card {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(16px);
+      border-radius: 48px;
+      padding: 40px 32px;
+      box-shadow: 0 30px 50px -20px #0f233f, 0 0 0 1px rgba(255,255,255,0.7) inset;
+      text-align: center;
+      animation: softAppear 0.6s ease;
+    }
+
+    .login-card h1 {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .login-card input {
+      background: #f2f7ff;
+      border: 2px solid #c0d2e8;
+      border-radius: 60px;
+      padding: 18px 24px;
+      font-size: 1.1rem;
+      width: 100%;
+      margin: 16px 0;
+      transition: 0.2s;
+    }
+
+    .login-btn {
+      background: linear-gradient(115deg, #13294b, #1e3a6b);
+      color: white;
+      border: none;
+      border-radius: 60px;
+      padding: 18px 32px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      width: 100%;
+      cursor: pointer;
+      box-shadow: 0 16px 28px -10px #13294b;
+      transition: 0.2s;
+    }
+
+    .login-btn:hover { transform: translateY(-4px); background: #1e3e70; }
+
+    /* main app (hidden until login) */
+    .main-app {
+      display: none;
+    }
+
     .nav-bar {
       display: flex;
       flex-wrap: nowrap;
       overflow-x: auto;
       gap: 8px;
       background: rgba(18, 30, 45, 0.9);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
       padding: 8px 16px;
       border-radius: 48px;
-      box-shadow: 0 10px 25px -8px #0b1a2e, 0 0 0 1px rgba(255,255,255,0.25) inset;
       margin-bottom: 24px;
-      scrollbar-width: none; /* Firefox hide */
-      -ms-overflow-style: none;
       border: 1px solid rgba(255,255,255,0.3);
     }
     .nav-bar::-webkit-scrollbar { display: none; }
@@ -54,7 +101,7 @@
     .nav-btn {
       background: transparent;
       border: none;
-      padding: 12px 18px;
+      padding: 12px 20px;
       border-radius: 40px;
       font-size: 0.95rem;
       font-weight: 600;
@@ -64,25 +111,16 @@
       gap: 8px;
       white-space: nowrap;
       transition: 0.2s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      flex-shrink: 0;
     }
-
-    .nav-btn i { font-size: 1.25rem; color: #b3ceff; }
 
     .nav-btn.active {
       background: white;
       color: #0b1f33;
       transform: scale(1.02);
-      box-shadow: 0 12px 18px -6px #020d1a;
     }
     .nav-btn.active i { color: #1f3a6b; }
 
-    /* ===== PAGE TRANSITIONS (smooth) ===== */
-    .page {
-      display: none;
-      animation: fadeMove 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
-    }
+    .page { display: none; animation: fadeMove 0.4s ease; }
     .page.active-page { display: block; }
 
     @keyframes fadeMove {
@@ -90,50 +128,29 @@
       100% { opacity: 1; transform: translateY(0); }
     }
 
-    /* ===== CARDS – touch friendly ===== */
+    @keyframes softAppear { 0% { opacity:0; transform:scale(0.96); } 100% { opacity:1; transform:scale(1); } }
+
     .card {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255,255,255,0.9);
       backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
       border-radius: 36px;
       padding: 22px 20px;
-      box-shadow: 0 15px 35px -12px rgba(0, 20, 40, 0.25), 0 0 0 1px rgba(255,255,255,0.7) inset;
-      transition: transform 0.25s ease, box-shadow 0.3s;
-      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 20px 35px -16px #0f2335;
       margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.8);
+      transition: transform 0.25s;
     }
+    .card:hover { transform: translateY(-4px) scale(1.01); }
 
-    .card:hover {
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 0 25px 40px -14px #0c1d30;
-    }
-
-    /* mobile grid -> single column always */
-    .dashboard-grid, .grid-2 {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* ===== form elements ===== */
+    /* form elements */
     input, select, textarea {
       background: #ffffff;
       border: 1.5px solid #dae2ed;
       border-radius: 40px;
       padding: 16px 22px;
-      font-size: 1rem;
       width: 100%;
       margin-bottom: 16px;
-      -webkit-appearance: none;
-      appearance: none;
-      transition: 0.2s;
-    }
-
-    input:focus, select:focus {
-      outline: none;
-      border-color: #1f3a6b;
-      box-shadow: 0 0 0 4px rgba(28,60,120,0.2);
-      transform: scale(1.01);
+      font-size: 1rem;
     }
 
     .btn {
@@ -150,57 +167,25 @@
       gap: 12px;
       width: 100%;
       cursor: pointer;
-      box-shadow: 0 15px 25px -10px #0f2540, 0 2px 0 0 #90abdf inset;
-      transition: all 0.2s;
-      border: 1px solid #ffffff40;
       margin-bottom: 8px;
     }
-
     .btn-outline {
       background: white;
       color: #13294b;
-      box-shadow: 0 8px 18px -10px #a0b2cc;
       border: 1.5px solid #cbd6e8;
-    }
-
-    .btn-small {
-      padding: 12px 18px;
-      font-size: 0.95rem;
-      width: auto;
-      gap: 6px;
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 22px 28px -12px #0a1c30, 0 0 0 2px #ffffffc0 inset;
-    }
-
-    /* expense & event items */
-    .expense-list, .event-list, .saved-list {
-      max-height: 380px;
-      overflow-y: auto;
-      padding-right: 4px;
     }
 
     .expense-item, .event-item {
       background: white;
       border-radius: 30px;
-      padding: 18px 18px;
+      padding: 18px;
       margin-bottom: 14px;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       gap: 12px;
-      box-shadow: 0 5px 12px rgba(0,0,0,0.04);
       border-left: 8px solid #1f3e6f;
-      transition: 0.2s;
     }
     .event-item { border-left-color: #567ebd; }
-
-    .expense-item:hover, .event-item:hover {
-      transform: translateX(6px) scale(1.01);
-      box-shadow: 0 12px 22px -12px #1e3f6b;
-    }
 
     .badge {
       background: #ecf3fc;
@@ -208,203 +193,224 @@
       padding: 5px 16px;
       font-size: 0.8rem;
       font-weight: 600;
-      display: inline-block;
     }
 
     .insight-bubble {
       background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(4px);
       border-radius: 32px;
       padding: 18px 20px;
       margin: 16px 0;
       display: flex;
-      align-items: center;
       gap: 16px;
-      font-size: 0.95rem;
-      box-shadow: 0 4px 10px #cdddf0;
     }
 
-    .chart-container {
-      height: 200px;
-      width: 100%;
-      margin: 12px 0;
-    }
+    .chart-container { height: 200px; width: 100%; margin: 12px 0; }
 
-    /* mobile touch optimizations */
-    button, .btn, .nav-btn { touch-action: manipulation; }
-    input, select { font-size: 16px; } /* prevent zoom on iOS */
-
-    /* rupee symbol */
     .rupee-symbol { font-weight: 700; margin-right: 2px; }
 
-    /* loading shimmer for chart (background) */
-    .chart-container canvas { transition: opacity 0.5s; }
+    .logout-area {
+      text-align: right;
+      margin-bottom: 12px;
+    }
+    .logout-btn {
+      background: transparent;
+      border: 1px solid #a0b6d4;
+      padding: 8px 18px;
+      border-radius: 40px;
+      color: #1f3e6f;
+      font-weight: 500;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-<div class="app-container">
+<div class="app-container" id="appContainer">
 
-  <!-- compact nav (horizontal scroll on tiny) -->
-  <nav class="nav-bar">
-    <button class="nav-btn active" data-page="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
-    <button class="nav-btn" data-page="expenses"><i class="fas fa-wallet"></i> Expenses (₹)</button>
-    <button class="nav-btn" data-page="events"><i class="fas fa-calendar-alt"></i> Events</button>
-    <button class="nav-btn" data-page="saved"><i class="fas fa-bookmark"></i> Saved</button>
-  </nav>
+  <!-- LOGIN PAGE (visible by default) -->
+  <div id="loginPage" class="login-card">
+    <h1><i class="fas fa-leaf" style="color:#1f3e6f;"></i> SmartLife</h1>
+    <p style="color:#2c3f5e; margin-bottom: 32px;">Your personal finance & event companion</p>
+    <input type="text" id="loginUsername" placeholder="Enter username (e.g. alex, priya)" value="demo">
+    <button class="login-btn" id="loginBtn"><i class="fas fa-arrow-right-to-bracket"></i> Login / Continue</button>
+    <div style="margin-top: 28px; color:#687e9f;"><i class="fas fa-database"></i> Your data is saved per user</div>
+  </div>
 
-  <!-- DASHBOARD -->
-  <section id="dashboard" class="page active-page">
-    <div class="dashboard-grid">
-      <div class="card">
-        <h2 style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-indian-rupee-sign" style="background:#13294b; color:white; border-radius: 50%; padding: 8px;"></i> Monthly spend</h2>
-        <div style="font-size: 3rem; font-weight: 700;"><span class="rupee-symbol">₹</span><span id="totalExpensesDash">0</span></div>
-        <div class="chart-container">
-          <canvas id="dashboardChart"></canvas>
-        </div>
-        <div class="insight-bubble" id="insight1">
-          <i class="fas fa-bolt" style="font-size: 2rem; color:#13294b;"></i>
-          <span id="insightText">Add expenses for insights</span>
-        </div>
-      </div>
-      <div class="card">
-        <h3><i class="fas fa-brain"></i> Smart insights</h3>
-        <div id="insightContainer">
-          <div class="insight-bubble"><i class="fas fa-chart-line"></i> biggest category: —</div>
-          <div class="insight-bubble"><i class="fas fa-wave-square"></i> vs last month: —</div>
-        </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px;">
-          <button class="btn btn-small" data-page="expenses"><i class="fas fa-plus-circle"></i> Add expense</button>
-          <button class="btn btn-small btn-outline" data-page="events"><i class="fas fa-search-location"></i> Find events</button>
-        </div>
-      </div>
+  <!-- MAIN APP (hidden until login) -->
+  <div id="mainApp" class="main-app">
+    <div class="logout-area">
+      <span id="loggedUserDisplay" style="margin-right:16px; font-weight:600;"></span>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
-  </section>
 
-  <!-- EXPENSE TRACKER (INR) -->
-  <section id="expenses" class="page">
-    <div class="grid-2">
+    <nav class="nav-bar">
+      <button class="nav-btn active" data-page="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+      <button class="nav-btn" data-page="expenses"><i class="fas fa-wallet"></i> Expenses (₹)</button>
+      <button class="nav-btn" data-page="events"><i class="fas fa-calendar-alt"></i> Real Events</button>
+      <button class="nav-btn" data-page="saved"><i class="fas fa-bookmark"></i> Saved</button>
+    </nav>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page active-page">
+      <div style="display: flex; flex-direction: column; gap:20px;">
+        <div class="card">
+          <h2><i class="fas fa-indian-rupee-sign" style="background:#13294b; color:white; border-radius:50%; padding:8px;"></i> Monthly spend</h2>
+          <div style="font-size: 3rem; font-weight:700;"><span class="rupee-symbol">₹</span><span id="totalExpensesDash">0</span></div>
+          <div class="chart-container"><canvas id="dashboardChart"></canvas></div>
+          <div class="insight-bubble" id="insight1"><i class="fas fa-bolt" style="font-size:2rem;"></i><span id="insightText">Add expenses for insights</span></div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-brain"></i> Smart insights</h3>
+          <div id="insightContainer"></div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <button class="btn btn-small" data-page="expenses"><i class="fas fa-plus-circle"></i> Add expense</button>
+            <button class="btn btn-small btn-outline" data-page="events"><i class="fas fa-search-location"></i> Find events</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPENSE TRACKER -->
+    <section id="expenses" class="page">
       <div class="card">
         <h3><i class="fas fa-plus-circle"></i> New expense (₹)</h3>
         <form id="expenseForm">
           <input type="number" id="amount" placeholder="Amount (₹)" step="1" min="1" required>
-          <select id="category" required>
-            <option value="">Category</option>
-            <option>Food</option><option>Transport</option><option>Shopping</option>
-            <option>Entertainment</option><option>Bills</option><option>Other</option>
-          </select>
+          <select id="category" required><option value="">Category</option><option>Food</option><option>Transport</option><option>Shopping</option><option>Entertainment</option><option>Bills</option><option>Other</option></select>
           <input type="date" id="date" required>
-          <input type="text" id="desc" placeholder="Description (e.g. dinner)" required>
+          <input type="text" id="desc" placeholder="Description" required>
           <button class="btn" type="submit"><i class="fas fa-save"></i> Save expense</button>
         </form>
-        <div style="margin-top: 20px;">
-          <h4>📊 Category summary</h4>
-          <div id="categorySummary" class="insight-bubble">Food: ₹0, Transport: ₹0 ...</div>
-        </div>
+        <h4>📊 Category summary</h4>
+        <div id="categorySummary" class="insight-bubble">Food: ₹0, Transport: ₹0 ...</div>
       </div>
       <div class="card">
         <h3><i class="fas fa-list-ul"></i> All expenses</h3>
         <div id="expenseListContainer" class="expense-list"></div>
-        <div style="margin-top: 16px; font-size: 1.6rem; font-weight: 600;">
-          <span>Monthly total: </span><span class="rupee-symbol">₹</span><span id="monthlyTotal">0</span>
-        </div>
+        <div style="font-size:1.6rem; font-weight:600;"><span>Monthly total: </span><span class="rupee-symbol">₹</span><span id="monthlyTotal">0</span></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- EVENT FINDER + FILTER -->
-  <section id="events" class="page">
-    <div class="card" style="margin-bottom: 16px;">
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <input type="text" id="cityInput" placeholder="City (e.g. Mumbai, Delhi)" value="Mumbai">
-        <div style="display: flex; gap: 12px;">
-          <select id="categoryFilter" style="flex:2; margin-bottom:0;">
-            <option value="all">All categories</option>
-            <option>Music</option><option>Sports</option><option>Food</option><option>Tech</option><option>Arts</option>
-          </select>
-          <button class="btn btn-small" id="searchEventsBtn" style="flex:1; margin:0;"><i class="fas fa-search"></i> Go</button>
+    <!-- REAL EVENT FINDER (mock database, filter by city, category) -->
+    <section id="events" class="page">
+      <div class="card">
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <input type="text" id="cityInput" placeholder="City (e.g. Mumbai, Delhi, NY)" value="Mumbai">
+          <div style="display:flex; gap:12px;">
+            <select id="categoryFilter" style="flex:2;"><option value="all">All categories</option><option>Music</option><option>Sports</option><option>Food</option><option>Tech</option><option>Arts</option></select>
+            <button class="btn btn-small" id="searchEventsBtn" style="flex:1;"><i class="fas fa-search"></i> Search</button>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="grid-2" style="gap:16px;">
       <div class="card">
-        <h3><i class="fas fa-calendar-day"></i> Upcoming events</h3>
+        <h3><i class="fas fa-calendar-day"></i> Upcoming real events</h3>
         <div id="eventList" class="event-list"></div>
       </div>
       <div class="card">
         <h3><i class="fas fa-bookmark"></i> Saved events</h3>
         <div id="savedEventList" class="saved-list"></div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- SAVED PAGE (duplicate for convenience) -->
-  <section id="saved" class="page">
-    <div class="card">
-      <h2><i class="fas fa-bookmark"></i> Your bookmarked events</h2>
-      <div id="savedOnlyList" class="event-list"></div>
-    </div>
-  </section>
+    <!-- SAVED PAGE -->
+    <section id="saved" class="page">
+      <div class="card">
+        <h2><i class="fas fa-bookmark"></i> Your bookmarked events</h2>
+        <div id="savedOnlyList" class="event-list"></div>
+      </div>
+    </section>
+  </div>
 </div>
 
 <script>
   (function() {
-    // ---------- Mobile-optimized SmartLife with INR & smooth animations ----------
+    // ---------- USER DATABASE (simulated) with per-user localStorage keys ----------
+    let currentUser = null;
+
+    // In-memory event database (realistic mock)
+    const eventDatabase = [
+      { id: 1001, name: 'Sunburn Arena Mumbai', date: '2025-04-15', category: 'Music', location: 'Mumbai, Mahalaxmi', description: 'Electronic music festival', city: 'Mumbai' },
+      { id: 1002, name: 'IPL 2025: MI vs CSK', date: '2025-04-18', category: 'Sports', location: 'Mumbai, Wankhede', description: 'Cricket match', city: 'Mumbai' },
+      { id: 1003, name: 'Delhi Food Festival', date: '2025-04-20', category: 'Food', location: 'Delhi, CP', description: 'Street food from across India', city: 'Delhi' },
+      { id: 1004, name: 'TechBash Bengaluru', date: '2025-04-22', category: 'Tech', location: 'Bengaluru, Manyata', description: 'Startup & tech conference', city: 'Bengaluru' },
+      { id: 1005, name: 'Kala Ghoda Arts Fest', date: '2025-04-25', category: 'Arts', location: 'Mumbai, Fort', description: 'Art exhibitions and workshops', city: 'Mumbai' },
+      { id: 1006, name: 'Hyderabad Food Walk', date: '2025-04-28', category: 'Food', location: 'Hyderabad, Old City', description: 'Biryani and street food', city: 'Hyderabad' },
+      { id: 1007, name: 'Pune Comedy Night', date: '2025-05-02', category: 'Arts', location: 'Pune, Koregaon Park', description: 'Stand-up comedy', city: 'Pune' },
+      { id: 1008, name: 'Chennai Music Season', date: '2025-05-05', category: 'Music', location: 'Chennai, Mylapore', description: 'Carnatic music', city: 'Chennai' },
+      { id: 1009, name: 'Startup Meet Kolkata', date: '2025-05-08', category: 'Tech', location: 'Kolkata, Salt Lake', description: 'Networking for founders', city: 'Kolkata' },
+      { id: 1010, name: 'Jaipur Literature Fest', date: '2025-05-10', category: 'Arts', location: 'Jaipur, Diggi Palace', description: 'Authors and books', city: 'Jaipur' },
+      { id: 1011, name: 'Mumbai Marathon', date: '2025-05-15', category: 'Sports', location: 'Mumbai, Bandra', description: 'Annual running event', city: 'Mumbai' },
+      { id: 1012, name: 'Delhi Wine & Dine', date: '2025-05-18', category: 'Food', location: 'Delhi, Chanakyapuri', description: 'Food and wine tasting', city: 'Delhi' },
+      { id: 1013, name: 'Bengaluru Tech Summit', date: '2025-05-20', category: 'Tech', location: 'Bengaluru, Palace Grounds', description: 'Tech expo', city: 'Bengaluru' },
+      { id: 1014, name: 'Rahgir Live Concert', date: '2025-05-22', category: 'Music', location: 'Delhi, IG Stadium', description: 'Folk fusion', city: 'Delhi' },
+      { id: 1015, name: 'Art Street Pune', date: '2025-05-25', category: 'Arts', location: 'Pune, FC Road', description: 'Street art and crafts', city: 'Pune' }
+    ];
+
+    // Data functions with per-user isolation
+    function getUserExpenseKey() { return `smartlife_exp_${currentUser}`; }
+    function getUserBookmarkKey() { return `smartlife_bmk_${currentUser}`; }
+
     let expenses = [];
-    let events = [];
     let bookmarks = [];
-    let nextEventId = 1000;
 
-    // Load from localStorage
-    function loadData() {
+    function loadUserData() {
+      if (!currentUser) return;
+      const expKey = getUserExpenseKey();
+      const bmkKey = getUserBookmarkKey();
       try {
-        const storedExp = localStorage.getItem('smartlife_mobile_inr');
-        expenses = storedExp ? JSON.parse(storedExp) : [];
-
-        const storedBkm = localStorage.getItem('smartlife_mobile_bookmarks');
-        bookmarks = storedBkm ? JSON.parse(storedBkm) : [];
+        expenses = JSON.parse(localStorage.getItem(expKey)) || [];
+        bookmarks = JSON.parse(localStorage.getItem(bmkKey)) || [];
       } catch (e) { expenses = []; bookmarks = []; }
-      generateMockEvents();
     }
 
-    function saveExpenses() { localStorage.setItem('smartlife_mobile_inr', JSON.stringify(expenses)); }
-    function saveBookmarks() { localStorage.setItem('smartlife_mobile_bookmarks', JSON.stringify(bookmarks)); }
-
-    // Mock events with Indian cities
-    function generateMockEvents() {
-      const categories = ['Music', 'Sports', 'Food', 'Tech', 'Arts'];
-      const names = ['Sunburn Arena', 'IPL Night', 'Food Truck Fest', 'TechBash', 'Kala Ghoda', 'Comedy Night', 'Wine & Dine', 'Startup Meet', 'Cricket League', 'Bollywood Beat'];
-      const cities = ['Mumbai', 'Delhi', 'Bengaluru', 'Chennai', 'Kolkata', 'Hyderabad', 'Pune', 'Jaipur'];
-      events = [];
-      for (let i=0; i<24; i++) {
-        const cat = categories[Math.floor(Math.random() * categories.length)];
-        const city = cities[Math.floor(Math.random() * cities.length)];
-        events.push({
-          id: nextEventId++,
-          name: names[Math.floor(Math.random() * names.length)] + ' ' + (i+1),
-          date: `2025-0${Math.floor(Math.random()*5)+2}-${Math.floor(Math.random()*20)+10}`,
-          category: cat,
-          location: city + ', ' + ['Stadium','Ground','Center','Hub','Garden'][Math.floor(Math.random()*5)],
-          description: 'Enjoy ' + cat + ' in ' + city,
-          city: city
-        });
-      }
+    function saveExpenses() {
+      if (!currentUser) return;
+      localStorage.setItem(getUserExpenseKey(), JSON.stringify(expenses));
+    }
+    function saveBookmarks() {
+      if (!currentUser) return;
+      localStorage.setItem(getUserBookmarkKey(), JSON.stringify(bookmarks));
     }
 
-    // Render expenses (INR)
+    // UI Elements
+    const loginPage = document.getElementById('loginPage');
+    const mainApp = document.getElementById('mainApp');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginUsername = document.getElementById('loginUsername');
+    const loggedUserDisplay = document.getElementById('loggedUserDisplay');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    loginBtn.addEventListener('click', () => {
+      const username = loginUsername.value.trim();
+      if (!username) { alert('Enter username'); return; }
+      currentUser = username.toLowerCase().replace(/\s/g,'');
+      loggedUserDisplay.innerText = `👤 ${username}`;
+      loadUserData();
+      renderAll();
+      loginPage.style.display = 'none';
+      mainApp.style.display = 'block';
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      expenses = [];
+      bookmarks = [];
+      mainApp.style.display = 'none';
+      loginPage.style.display = 'block';
+      loginUsername.value = 'demo';
+    });
+
+    // ---------- EXPENSE RENDERING ----------
     function renderExpenses() {
       const container = document.getElementById('expenseListContainer');
       if (!container) return;
-      if (!expenses.length) { container.innerHTML = '<div class="badge">No expenses yet. Tap + to add.</div>'; updateTotals(); return; }
+      if (!expenses.length) { container.innerHTML = '<div class="badge">No expenses yet. Add one.</div>'; updateTotals(); return; }
       let html = '';
       expenses.forEach((exp, idx) => {
         html += `<div class="expense-item">
-          <div style="flex:1">
-            <strong>${exp.desc}</strong> <span class="badge">${exp.category}</span><br>
-            <span>${exp.date}  •  <span class="rupee-symbol">₹</span>${parseFloat(exp.amount).toFixed(0)}</span>
-          </div>
-          <div style="display: flex; gap:8px;">
-            <button class="btn-small btn-outline" style="padding:8px 14px;" onclick="editExpense(${idx})"><i class="fas fa-edit"></i></button>
-            <button class="btn-small btn-outline" style="padding:8px 14px;" onclick="deleteExpense(${idx})"><i class="fas fa-trash"></i></button>
+          <div style="flex:1"><strong>${exp.desc}</strong> <span class="badge">${exp.category}</span><br>${exp.date}  •  ₹${parseFloat(exp.amount).toFixed(0)}</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-small btn-outline" onclick="editExpense(${idx})"><i class="fas fa-edit"></i></button>
+            <button class="btn-small btn-outline" onclick="deleteExpense(${idx})"><i class="fas fa-trash"></i></button>
           </div>
         </div>`;
       });
@@ -416,7 +422,6 @@
       const now = new Date();
       const month = now.getMonth();
       const year = now.getFullYear();
-
       let monthlyTotal = 0;
       let catTotals = {Food:0, Transport:0, Shopping:0, Entertainment:0, Bills:0, Other:0};
       expenses.forEach(e => {
@@ -425,18 +430,15 @@
         if (catTotals.hasOwnProperty(e.category)) catTotals[e.category] += parseFloat(e.amount);
         else catTotals.Other += parseFloat(e.amount);
       });
-
       document.getElementById('monthlyTotal').innerText = monthlyTotal.toFixed(0);
       document.getElementById('totalExpensesDash').innerText = monthlyTotal.toFixed(0);
-
       let catString = Object.entries(catTotals).map(([c,v]) => `${c}: ₹${v.toFixed(0)}`).join(' · ');
       document.getElementById('categorySummary').innerHTML = catString || 'No data';
 
       let biggest = '—'; let maxVal = 0;
-      for (let [c,v] of Object.entries(catTotals)) { if (v>maxVal) { maxVal = v; biggest = c; } }
-
+      for (let [c,v] of Object.entries(catTotals)) { if (v>maxVal) { maxVal=v; biggest=c; } }
       let insightMsg = biggest !== '—' ? `Biggest: ${biggest} (₹${maxVal.toFixed(0)})` : 'Add expenses';
-      let compareMsg = (catTotals.Food > 2000) ? 'Food 34% above last month' : 'Spending stable';
+      let compareMsg = (catTotals.Food > 2000) ? 'Food 32% above last month' : 'Spending stable';
       document.getElementById('insightContainer').innerHTML = `
         <div class="insight-bubble"><i class="fas fa-crown"></i> ${insightMsg}</div>
         <div class="insight-bubble"><i class="fas fa-chart-simple"></i> ${compareMsg}</div>
@@ -451,38 +453,24 @@
       if (dashChart) dashChart.destroy();
       dashChart = new Chart(ctx, {
         type: 'doughnut',
-        data: {
-          labels: Object.keys(catTotals),
-          datasets: [{
-            data: Object.values(catTotals),
-            backgroundColor: ['#1f3e6f','#345b99','#567ebb','#7fa0d4','#b0c6e8','#d6e3f5'],
-            borderWidth: 0,
-            borderRadius: 6
-          }]
-        },
-        options: {
-          cutout: '65%',
-          responsive: true,
-          maintainAspectRatio: false,
-          animation: { duration: 1000, easing: 'easeOutQuart' },
-          plugins: { legend: { display: false } }
-        }
+        data: { labels: Object.keys(catTotals), datasets: [{ data: Object.values(catTotals), backgroundColor: ['#1f3e6f','#345b99','#567ebb','#7fa0d4','#b0c6e8','#d6e3f5'], borderWidth: 0 }] },
+        options: { cutout: '65%', responsive: true, maintainAspectRatio: false, animation: { duration: 1000 } }
       });
     }
 
-    // CRUD
-    window.deleteExpense = (idx) => { expenses.splice(idx,1); saveExpenses(); renderExpenses(); renderAll(); };
+    window.deleteExpense = (idx) => { expenses.splice(idx,1); saveExpenses(); renderExpenses(); };
     window.editExpense = (idx) => {
       const e = expenses[idx];
       const newAmt = prompt('Edit amount (₹)', e.amount);
       if (newAmt) e.amount = parseFloat(newAmt).toFixed(0);
       const newCat = prompt('Edit category', e.category);
       if (newCat) e.category = newCat;
-      saveExpenses(); renderExpenses(); renderAll();
+      saveExpenses(); renderExpenses();
     };
 
     document.getElementById('expenseForm').addEventListener('submit', (e) => {
       e.preventDefault();
+      if (!currentUser) return;
       const amount = document.getElementById('amount').value;
       const category = document.getElementById('category').value;
       const date = document.getElementById('date').value;
@@ -494,32 +482,37 @@
       e.target.reset();
     });
 
-    // events render + filter
+    // ---------- REAL EVENT FINDER (from eventDatabase) ----------
     function renderEvents() {
-      const city = document.getElementById('cityInput').value.trim() || 'Mumbai';
+      const city = document.getElementById('cityInput').value.trim().toLowerCase() || 'mumbai';
       const catFilter = document.getElementById('categoryFilter').value;
-      const filtered = events.filter(ev => ev.city.toLowerCase().includes(city.toLowerCase()) && (catFilter==='all' || ev.category===catFilter));
+      const filtered = eventDatabase.filter(ev => 
+        ev.city.toLowerCase().includes(city) && (catFilter === 'all' || ev.category === catFilter)
+      );
       const container = document.getElementById('eventList');
-      if (!filtered.length) { container.innerHTML = '<div class="badge">No events – try another city</div>'; return; }
+      if (!filtered.length) { container.innerHTML = '<div class="badge">No real events found. Try another city.</div>'; return; }
       let html = '';
       filtered.forEach(ev => {
         const saved = bookmarks.includes(ev.id);
         html += `<div class="event-item">
           <div style="flex:2"><strong>${ev.name}</strong> <span class="badge">${ev.category}</span><br>
           <i class="fas fa-calendar"></i> ${ev.date}  <i class="fas fa-map-pin"></i> ${ev.location}<br>${ev.description}</div>
-          <div><button class="btn-small btn-outline" onclick="toggleBookmark(${ev.id})">${saved ? '<i class="fas fa-bookmark bookmark-star"></i>' : '<i class="far fa-bookmark"></i>'}</button></div>
+          <div><button class="btn-small btn-outline" onclick="toggleBookmark(${ev.id})">${saved ? '<i class="fas fa-bookmark" style="color:#f5b830;"></i>' : '<i class="far fa-bookmark"></i>'}</button></div>
         </div>`;
       });
       container.innerHTML = html;
     }
 
     window.toggleBookmark = (id) => {
+      if (!currentUser) return;
       if (bookmarks.includes(id)) { bookmarks = bookmarks.filter(b => b !== id); } else { bookmarks.push(id); }
-      saveBookmarks(); renderEvents(); renderSavedSections();
+      saveBookmarks();
+      renderEvents();
+      renderSavedSections();
     };
 
     function renderSavedSections() {
-      const savedEv = events.filter(ev => bookmarks.includes(ev.id));
+      const savedEv = eventDatabase.filter(ev => bookmarks.includes(ev.id));
       const html = savedEv.map(ev => `<div class="event-item">
         <div><strong>${ev.name}</strong> <span class="badge">${ev.category}</span><br>${ev.date} · ${ev.location}</div>
         <div><button class="btn-small btn-outline" onclick="toggleBookmark(${ev.id})"><i class="fas fa-trash-alt"></i></button></div>
@@ -528,7 +521,7 @@
       document.getElementById('savedOnlyList').innerHTML = html || '<div class="badge">Bookmark events to see them</div>';
     }
 
-    // navigation
+    // navigation & helpers
     function setupNavigation() {
       const navBtns = document.querySelectorAll('.nav-btn');
       const pages = document.querySelectorAll('.page');
@@ -540,35 +533,40 @@
           pages.forEach(p => p.classList.remove('active-page'));
           document.getElementById(pageId).classList.add('active-page');
           if (pageId==='events' || pageId==='saved') { renderEvents(); renderSavedSections(); }
-          if (pageId==='expenses' || pageId==='dashboard') { renderExpenses(); updateTotals(); }
+          if (pageId==='expenses' || pageId==='dashboard') { renderExpenses(); }
         });
       });
     }
 
     function renderAll() { renderExpenses(); updateTotals(); renderEvents(); renderSavedSections(); }
 
-    loadData();
-    renderAll();
-    setupNavigation();
-
     document.getElementById('searchEventsBtn').addEventListener('click', renderEvents);
     document.getElementById('categoryFilter').addEventListener('change', renderEvents);
 
-    // dashboard buttons navigation
     document.querySelectorAll('.btn[data-page]').forEach(b => {
-      b.addEventListener('click', (e) => {
-        const page = b.dataset.page;
-        document.querySelector(`.nav-btn[data-page="${page}"]`).click();
-      });
+      b.addEventListener('click', () => { document.querySelector(`.nav-btn[data-page="${b.dataset.page}"]`).click(); });
     });
+
+    setupNavigation();
   })();
 </script>
-
-<!-- tiny extra touch -->
-<style>
-  .bookmark-star { color: #f5b830; }
-  .btn-small i { pointer-events: none; }
-  @media (max-width: 380px) { .nav-btn { padding: 10px 14px; font-size:0.85rem; } }
-</style>
 </body>
 </html>
+<!-- Add this near the logout button -->
+<button class="logout-btn" onclick="viewAllUsers()" style="margin-left:10px;">
+  <i class="fas fa-database"></i> View All Users
+</button>
+
+<script>
+function viewAllUsers() {
+  const userData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('smartlife_')) {
+      userData[key] = JSON.parse(localStorage.getItem(key));
+    }
+  }
+  console.log('📊 ALL USERS DATA:', userData);
+  alert('Check the console (F12) to see all user data!');
+}
+</script>
